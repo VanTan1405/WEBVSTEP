@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f3ee">
+  <title>Gõ chuẩn — Luyện gõ theo văn bản</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f5f3ee;
+      --white: #fff;
+      --ink: #22251f;
+      --muted: #77796f;
+      --line: #e7e5dc;
+      --green: #2d624d;
+      --green-dark: #214b3b;
+      --green-wash: #edf4ef;
+      --red: #c3413e;
+      --red-wash: #fff0ee;
+      --shadow: 0 16px 50px rgba(45, 48, 37, .07);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, textarea, input { font: inherit; }
+    .shell { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+    header { height: 76px; border-bottom: 1px solid rgba(34,37,31,.08); }
+    .topbar { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font-weight: 750; letter-spacing: -.035em; }
+    .brand-mark { width: 33px; height: 33px; display:grid; place-items:center; border-radius: 11px; color: white; background: var(--green); }
+    .brand-mark svg { width: 18px; height: 18px; }
+    .top-note { color: var(--muted); font-size: 13px; }
+    main { padding: 52px 0 70px; }
+    .intro { margin: 0 auto 30px; max-width: 680px; text-align: center; }
+    .eyebrow { display: inline-flex; align-items:center; gap: 7px; color: var(--green); font-size: 11px; font-weight: 750; letter-spacing: .11em; text-transform: uppercase; }
+    .eyebrow::before { content:""; width: 6px; height: 6px; border-radius:50%; background:#77a58a; }
+    h1 { margin: 12px 0 10px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(38px, 6vw, 58px); font-weight: 500; line-height: 1.04; letter-spacing: -.045em; }
+    .intro p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.65; }
+    .card { background: var(--white); border: 1px solid rgba(34,37,31,.07); border-radius: 18px; box-shadow: var(--shadow); }
+    .source-card { max-width: 760px; margin: 0 auto; padding: 24px; }
+    .section-head { display:flex; justify-content:space-between; gap: 16px; align-items:center; margin-bottom: 13px; }
+    .section-title { font-size: 14px; font-weight: 700; }
+    .section-hint { color: var(--muted); font-size: 12px; }
+    textarea { display:block; width:100%; resize:vertical; min-height: 146px; border:1px solid var(--line); border-radius:11px; background:#fdfdfb; padding:14px 15px; color:var(--ink); font-size:14px; line-height:1.75; outline:none; transition:border-color .18s, box-shadow .18s; }
+    textarea:focus, .type-input:focus { border-color:#739681; box-shadow:0 0 0 3px rgba(45,98,77,.09); }
+    textarea::placeholder, .type-input::placeholder { color:#aaa99f; }
+    .source-footer { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:15px; }
+    .privacy { display:flex; align-items:center; gap:7px; color:var(--muted); font-size:12px; }
+    .privacy svg { width:14px; height:14px; }
+    .primary, .secondary { min-height:43px; display:inline-flex; justify-content:center; align-items:center; gap:8px; border:0; border-radius:10px; padding:0 17px; cursor:pointer; font-size:13px; font-weight:700; transition:background .15s, transform .15s; }
+    .primary { background:var(--green); color:#fff; }
+    .primary:hover { background:var(--green-dark); transform:translateY(-1px); }
+    .primary:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+    .primary svg, .secondary svg { width:15px; height:15px; }
+    .secondary { background:#f1f0eb; color:#4f5149; }
+    .secondary:hover { background:#e9e8e1; }
+    .practice { max-width:760px; margin:26px auto 0; }
+    .practice[hidden], .source-card[hidden] { display:none; }
+    .progress-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:0 3px; margin-bottom:12px; }
+    .progress-label { font-size:13px; font-weight:700; }
+    .progress-count { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+    .track { height:5px; margin-bottom:16px; overflow:hidden; border-radius:9px; background:#e8e7df; }
+    .track-fill { height:100%; width:0; border-radius:inherit; background:#649276; transition:width .3s ease; }
+    .exercise { padding:26px; }
+    .exercise-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:21px; }
+    .prompt-tag { display:flex; align-items:center; gap:8px; color:var(--green); font-size:11px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; }
+    .prompt-tag svg { width:15px; height:15px; }
+    .key-hint { color:var(--muted); font-size:11px; }
+    .prompt { margin:0 0 22px; font-family:Georgia, "Times New Roman", serif; font-size:clamp(21px, 3vw, 27px); line-height:1.55; letter-spacing:-.018em; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .label { display:block; margin-bottom:9px; color:#5b5d55; font-size:12px; font-weight:650; }
+    .type-input { width:100%; min-height:54px; border:1px solid var(--line); border-radius:10px; padding:13px 14px; outline:none; color:var(--ink); font-size:15px; transition:border-color .18s, box-shadow .18s; }
+    .exercise-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; }
+    .feedback { display:none; margin-top:20px; padding:16px; border-radius:11px; font-size:13px; line-height:1.7; }
+    .feedback.show { display:block; }
+    .feedback.good { color:#285640; background:var(--green-wash); }
+    .feedback.bad { color:#713c39; background:var(--red-wash); }
+    .feedback-title { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-weight:750; }
+    .feedback-title svg { width:17px; height:17px; flex:none; }
+    .diff-line { margin:6px 0 0; color:#454740; overflow-wrap:anywhere; }
+    .diff-label { color:#77796f; font-size:11px; }
+    .char-ok { color:#315b47; }
+    .char-wrong { color:var(--red); background:rgba(195,65,62,.1); border-radius:2px; text-decoration:underline; text-decoration-color:rgba(195,65,62,.5); text-underline-offset:3px; }
+    .char-missing { color:var(--red); background:rgba(195,65,62,.1); border-radius:2px; text-decoration:line-through; }
+    .feedback-note { margin:9px 0 0; color:#79746b; font-size:11px; }
+    .finish { display:none; padding:38px 25px; text-align:center; }
+    .finish.show { display:block; }
+    .finish-mark { width:54px; height:54px; display:grid; place-items:center; margin:0 auto 17px; border-radius:18px; background:var(--green-wash); color:var(--green); }
+    .finish-mark svg { width:25px; height:25px; }
+    .finish h2 { margin:0 0 8px; font-family:Georgia,serif; font-size:30px; font-weight:500; letter-spacing:-.03em; }
+    .finish p { margin:0 0 22px; color:var(--muted); font-size:14px; }
+    .footnote { margin:23px auto 0; color:#898a81; text-align:center; font-size:11px; }
+    @media (max-width:600px) {
+      .shell { width:calc(100% - 28px); }
+      header { height:64px; }
+      .top-note { font-size:11px; }
+      main { padding:35px 0 45px; }
+      .intro { margin-bottom:23px; }
+      .intro p { font-size:13px; }
+      .source-card { padding:18px; }
+      .section-head { align-items:flex-start; flex-direction:column; gap:5px; }
+      .source-footer { align-items:flex-start; flex-direction:column; }
+      .source-footer .primary { width:100%; }
+      .exercise { padding:19px; }
+      .key-hint { display:none; }
+      .exercise-actions { align-items:stretch; }
+      .exercise-actions .primary { flex:1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell topbar">
+      <a class="brand" href="#" aria-label="Gõ chuẩn, trang chủ">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.2 4.2L19.5 6.7" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span>gõ chuẩn</span>
+      </a>
+      <span class="top-note">Một câu mỗi lượt · Tiến bộ từng dòng</span>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="intro">
+      <span class="eyebrow">Góc luyện tập của bạn</span>
+      <h1>Gõ đúng, từng câu một.</h1>
+      <p>Dán đoạn văn của bạn vào đây. Gõ lại từng câu và xem ngay những ký tự cần sửa.</p>
+    </section>
+
+    <section class="card source-card" id="sourceCard" aria-labelledby="sourceTitle">
+      <div class="section-head">
+        <span class="section-title" id="sourceTitle">1. Dán văn bản làm đề</span>
+        <span class="section-hint">Mỗi câu kết thúc bằng dấu chấm sẽ thành một lượt.</span>
+      </div>
+      <textarea id="sourceText" placeholder="Ví dụ: Hôm nay trời đẹp. Tôi muốn luyện gõ thật chính xác. Dán đoạn văn của bạn vào đây..." aria-label="Văn bản làm đề"></textarea>
+      <div class="source-footer">
+        <span class="privacy"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3m-11 0h12a2 2 0 0 1 2 2v8H4v-8a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Văn bản chỉ được xử lý trên trang này.</span>
+        <button class="primary" id="startButton" type="button">
+          Bắt đầu luyện <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="practice" id="practice" hidden aria-live="polite">
+      <div class="progress-row"><span class="progress-label">Đang luyện tập</span><span class="progress-count" id="progressCount">Câu 1 / 1</span></div>
+      <div class="track" aria-label="Tiến độ"><div class="track-fill" id="progressFill"></div></div>
+      <div class="card exercise" id="exerciseCard">
+        <div class="exercise-top">
+          <span class="prompt-tag"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5.5h14M5 10h14M5 14.5h8M5 19h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Gõ lại câu này</span>
+          <span class="key-hint">Nhấn Enter để Submit</span>
+        </div>
+        <p class="prompt" id="prompt"></p>
+        <form id="answerForm">
+          <label class="label" for="answerInput">Câu trả lời của bạn</label>
+          <input class="type-input" id="answerInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Bắt đầu gõ tại đây...">
+          <div class="exercise-actions">
+            <button class="secondary" id="changeTextButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Đổi văn bản</button>
+            <button class="primary" id="submitButton" type="submit">Submit <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </form>
+        <div class="feedback" id="feedback" role="status"></div>
+      </div>
+      <div class="card finish" id="finish">
+        <div class="finish-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19.5 6.7" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2>Hoàn thành rồi!</h2>
+        <p id="finishSummary"></p>
+        <button class="primary" id="restartButton" type="button">Luyện lại từ đầu</button>
+      </div>
+      <p class="footnote">So sánh từng ký tự, bao gồm dấu câu và khoảng trắng.</p>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const sourceCard = document.querySelector('#sourceCard');
+      const sourceText = document.querySelector('#sourceText');
+      const startButton = document.querySelector('#startButton');
+      const practice = document.querySelector('#practice');
+      const prompt = document.querySelector('#prompt');
+      const progressCount = document.querySelector('#progressCount');
+      const progressFill = document.querySelector('#progressFill');
+      const answerForm = document.querySelector('#answerForm');
+      const answerInput = document.querySelector('#answerInput');
+      const submitButton = document.querySelector('#submitButton');
+      const feedback = document.querySelector('#feedback');
+      const exerciseCard = document.querySelector('#exerciseCard');
+      const finish = document.querySelector('#finish');
+      const finishSummary = document.querySelector('#finishSummary');
+      let sentences = [];
+      let index = 0;
+      let correctCount = 0;
+      let submitted = false;
+
+      // A final period is kept with its sentence; other punctuation stays as typed.
+      function splitSentences(text) {
+        return text.match(/[^.]+\./g)?.map(s => s.trim()).filter(Boolean) ?? [];
+      }
+      function showFeedback(ok, typed, expected) {
+        feedback.className = `feedback show ${ok ? 'good' : 'bad'}`;
+        if (ok) {
+          feedback.innerHTML = '<div class="feedback-title"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.2 4.2L19.5 6.7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Chính xác! Câu này hoàn toàn khớp.</div>';
+          return;
+        }
+
+        // Longest common subsequence aligns characters so insertions, omissions, and
+        // substitutions can be marked separately in the learner's answer.
+        const n = typed.length, m = expected.length;
+        const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+        for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+          dp[i][j] = typed[i] === expected[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+        const typedParts = [], expectedParts = [];
+        let i = 0, j = 0;
+        while (i < n || j < m) {
+          if (i < n && j < m && typed[i] === expected[j]) {
+            typedParts.push(`<span class="char-ok">${escapeHtml(typed[i])}</span>`);
+            expectedParts.push(`<span class="char-ok">${escapeHtml(expected[j])}</span>`); i++; j++;
+          } else if (i < n && (j === m || dp[i + 1][j] >= dp[i][j + 1])) {
+            typedParts.push(`<span class="char-wrong">${escapeHtml(typed[i])}</span>`); i++;
+          } else {
+            expectedParts.push(`<span class="char-missing">${escapeHtml(expected[j])}</span>`); j++;
+          }
+        }
+        feedback.innerHTML = `<div class="feedback-title"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5m0 4h.01M10.3 3.9 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3l-7.5-13.1a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Chưa khớp — ký tự sai được tô đỏ.</div>
+          <div class="diff-label">Bạn đã gõ</div><div class="diff-line">${typedParts.join('') || '<span class="char-wrong">∅</span>'}</div>
+          <div class="diff-label" style="margin-top:10px">Câu đúng · phần màu đỏ là ký tự bạn còn thiếu</div><div class="diff-line">${expectedParts.join('')}</div>
+          <p class="feedback-note">Dấu câu và khoảng trắng cũng được tính khi so sánh.</p>`;
+      }
+      function escapeHtml(value) {
+        return value.replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
+      }
+      function render() {
+        submitted = false;
+        feedback.className = 'feedback';
+        feedback.textContent = '';
+        answerInput.disabled = false;
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Submit <svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        answerInput.value = '';
+        prompt.textContent = sentences[index];
+        progressCount.textContent = `Câu ${index + 1} / ${sentences.length}`;
+        progressFill.style.width = `${(index / sentences.length) * 100}%`;
+        answerInput.focus();
+      }
+      function start() {
+        const parsed = splitSentences(sourceText.value);
+        if (!parsed.length) {
+          sourceText.focus();
+          sourceText.setCustomValidity('Hãy dán văn bản có ít nhất một câu kết thúc bằng dấu chấm.');
+          sourceText.reportValidity();
+          sourceText.addEventListener('input', () => sourceText.setCustomValidity(''), { once: true });
+          return;
+        }
+        sentences = parsed;
+        index = 0;
+        correctCount = 0;
+        sourceCard.hidden = true;
+        practice.hidden = false;
+        finish.classList.remove('show');
+        exerciseCard.style.display = '';
+        render();
+      }
+      function next() {
+        index++;
+        if (index >= sentences.length) {
+          exerciseCard.style.display = 'none';
+          progressCount.textContent = `Hoàn thành ${sentences.length} câu`;
+          progressFill.style.width = '100%';
+          finishSummary.textContent = `Bạn trả lời chính xác ${correctCount} / ${sentences.length} câu ngay lần đầu.`;
+          finish.classList.add('show');
+        } else render();
+      }
+      startButton.addEventListener('click', start);
+      answerForm.addEventListener('submit', event => {
+        event.preventDefault();
+        if (submitted) { next(); return; }
+        const typed = answerInput.value;
+        if (!typed.length) { answerInput.focus(); return; }
+        const expected = sentences[index];
+        const ok = typed === expected;
+        if (ok) correctCount++;
+        showFeedback(ok, typed, expected);
+        submitted = true;
+        answerInput.disabled = true;
+        submitButton.innerHTML = index === sentences.length - 1
+          ? 'Xem kết quả <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          : 'Câu tiếp theo <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      });
+      document.querySelector('#changeTextButton').addEventListener('click', () => {
+        practice.hidden = true;
+        sourceCard.hidden = false;
+        sourceText.focus();
+      });
+      document.querySelector('#restartButton').addEventListener('click', () => {
+        index = 0;
+        correctCount = 0;
+        finish.classList.remove('show');
+        exerciseCard.style.display = '';
+        render();
+      });
+    })();
+  </script>
+</body>
+</html>
