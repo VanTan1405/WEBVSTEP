@@ -203,6 +203,7 @@
       let index = 0;
       let correctCount = 0;
       let submitted = false;
+      let lastAnswerCorrect = false;
       let answerVisible = true;
       let hideAnswerTimer;
 
@@ -246,6 +247,7 @@
       function render() {
         clearTimeout(hideAnswerTimer);
         submitted = false;
+        lastAnswerCorrect = false;
         feedback.className = 'feedback';
         feedback.textContent = '';
         answerInput.disabled = false;
@@ -272,6 +274,17 @@
           ? '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg>Ẩn đáp án'
           : '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 3 18 18M10.6 6.2A10.8 10.8 0 0 1 12 6c6.1 0 9.5 6 9.5 6a16 16 0 0 1-2.8 3.3M6.2 6.2C3.8 7.7 2.5 12 2.5 12s3.4 6 9.5 6c1.2 0 2.3-.3 3.3-.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Hiện đáp án';
         toggleAnswerButton.setAttribute('aria-pressed', String(visible));
+      }
+      function retryCurrentSentence() {
+        submitted = false;
+        feedback.className = 'feedback';
+        feedback.textContent = '';
+        answerInput.value = '';
+        answerInput.disabled = false;
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Submit <svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        setAnswerVisible(false);
+        answerInput.focus();
       }
       function start() {
         const parsed = splitSentences(sourceText.value);
@@ -305,19 +318,26 @@
       toggleAnswerButton.addEventListener('click', () => setAnswerVisible(!answerVisible));
       answerForm.addEventListener('submit', event => {
         event.preventDefault();
-        if (submitted) { next(); return; }
+        if (submitted) {
+          if (lastAnswerCorrect) next();
+          else retryCurrentSentence();
+          return;
+        }
         const typed = answerInput.value;
         if (!typed.length) { answerInput.focus(); return; }
         const expected = sentences[index];
         const ok = typed === expected;
+        lastAnswerCorrect = ok;
         clearTimeout(hideAnswerTimer);
         if (ok) correctCount++;
         showFeedback(ok, typed, expected);
         submitted = true;
         answerInput.disabled = true;
-        submitButton.innerHTML = index === sentences.length - 1
-          ? 'Xem kết quả <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-          : 'Câu tiếp theo <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        submitButton.innerHTML = ok
+          ? (index === sentences.length - 1
+            ? 'Xem kết quả <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : 'Câu tiếp theo <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>')
+          : 'Thử lại câu này <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14.8-4L3 10m0 0V5m0 5h5m-4 3a8 8 0 0 0 14.8 4L21 14m0 0v5m0-5h-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       });
       document.querySelector('#changeTextButton').addEventListener('click', () => {
         practice.hidden = true;
