@@ -70,10 +70,16 @@
     .track-fill { height:100%; width:0; border-radius:inherit; background:#649276; transition:width .3s ease; }
     .exercise { padding:26px; }
     .exercise-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:21px; }
+    .exercise-tools { display:flex; align-items:center; gap:12px; }
     .prompt-tag { display:flex; align-items:center; gap:8px; color:var(--green); font-size:11px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; }
     .prompt-tag svg { width:15px; height:15px; }
     .key-hint { color:var(--muted); font-size:11px; }
-    .prompt { margin:0 0 22px; font-family:Georgia, "Times New Roman", serif; font-size:clamp(21px, 3vw, 27px); line-height:1.55; letter-spacing:-.018em; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .answer-toggle { min-height:34px; padding:0 11px; font-size:11px; }
+    .answer-toggle svg { width:14px; height:14px; }
+    .prompt { min-height:74px; margin:0 0 22px; padding:2px 0; font-family:Georgia, "Times New Roman", serif; font-size:clamp(21px, 3vw, 27px); line-height:1.55; letter-spacing:-.018em; white-space:pre-wrap; overflow-wrap:anywhere; transition:color .18s, background-color .18s; }
+    .prompt.is-hidden { color:transparent; text-shadow:none; background:#eeede8; border-radius:8px; user-select:none; }
+    .prompt.blinking { animation:answer-blink .48s steps(2, jump-none) infinite; }
+    @keyframes answer-blink { 50% { opacity:.12; } }
     .label { display:block; margin-bottom:9px; color:#5b5d55; font-size:12px; font-weight:650; }
     .type-input { width:100%; min-height:54px; border:1px solid var(--line); border-radius:10px; padding:13px 14px; outline:none; color:var(--ink); font-size:15px; transition:border-color .18s, box-shadow .18s; }
     .exercise-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; }
@@ -151,7 +157,10 @@
       <div class="card exercise" id="exerciseCard">
         <div class="exercise-top">
           <span class="prompt-tag"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5.5h14M5 10h14M5 14.5h8M5 19h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Gõ lại câu này</span>
-          <span class="key-hint">Nhấn Enter để Submit</span>
+          <div class="exercise-tools">
+            <span class="key-hint">Nhấn Enter để Submit</span>
+            <button class="secondary answer-toggle" id="toggleAnswerButton" type="button" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg>Ẩn đáp án</button>
+          </div>
         </div>
         <p class="prompt" id="prompt"></p>
         <form id="answerForm">
@@ -180,6 +189,7 @@
       const startButton = document.querySelector('#startButton');
       const practice = document.querySelector('#practice');
       const prompt = document.querySelector('#prompt');
+      const toggleAnswerButton = document.querySelector('#toggleAnswerButton');
       const progressCount = document.querySelector('#progressCount');
       const progressFill = document.querySelector('#progressFill');
       const answerForm = document.querySelector('#answerForm');
@@ -193,6 +203,8 @@
       let index = 0;
       let correctCount = 0;
       let submitted = false;
+      let answerVisible = true;
+      let hideAnswerTimer;
 
       // A final period is kept with its sentence; other punctuation stays as typed.
       function splitSentences(text) {
@@ -232,6 +244,7 @@
         return value.replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
       }
       function render() {
+        clearTimeout(hideAnswerTimer);
         submitted = false;
         feedback.className = 'feedback';
         feedback.textContent = '';
@@ -239,10 +252,26 @@
         submitButton.disabled = false;
         submitButton.innerHTML = 'Submit <svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         answerInput.value = '';
+        answerVisible = true;
         prompt.textContent = sentences[index];
+        prompt.classList.remove('is-hidden');
+        prompt.classList.add('blinking');
+        toggleAnswerButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg>Ẩn đáp án';
+        toggleAnswerButton.setAttribute('aria-pressed', 'true');
+        hideAnswerTimer = setTimeout(() => setAnswerVisible(false), 3000);
         progressCount.textContent = `Câu ${index + 1} / ${sentences.length}`;
         progressFill.style.width = `${(index / sentences.length) * 100}%`;
         answerInput.focus();
+      }
+      function setAnswerVisible(visible) {
+        answerVisible = visible;
+        prompt.classList.remove('blinking');
+        prompt.classList.toggle('is-hidden', !visible);
+        prompt.textContent = visible ? sentences[index] : '';
+        toggleAnswerButton.innerHTML = visible
+          ? '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg>Ẩn đáp án'
+          : '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 3 18 18M10.6 6.2A10.8 10.8 0 0 1 12 6c6.1 0 9.5 6 9.5 6a16 16 0 0 1-2.8 3.3M6.2 6.2C3.8 7.7 2.5 12 2.5 12s3.4 6 9.5 6c1.2 0 2.3-.3 3.3-.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Hiện đáp án';
+        toggleAnswerButton.setAttribute('aria-pressed', String(visible));
       }
       function start() {
         const parsed = splitSentences(sourceText.value);
@@ -273,6 +302,7 @@
         } else render();
       }
       startButton.addEventListener('click', start);
+      toggleAnswerButton.addEventListener('click', () => setAnswerVisible(!answerVisible));
       answerForm.addEventListener('submit', event => {
         event.preventDefault();
         if (submitted) { next(); return; }
@@ -280,6 +310,7 @@
         if (!typed.length) { answerInput.focus(); return; }
         const expected = sentences[index];
         const ok = typed === expected;
+        clearTimeout(hideAnswerTimer);
         if (ok) correctCount++;
         showFeedback(ok, typed, expected);
         submitted = true;
